@@ -1,6 +1,6 @@
 # Docker image for Jenkins Enterprise by CloudBees master
 
-FROM kmadel/jenkins-base
+FROM kmadel/jenkins-base:1.0
 MAINTAINER Kurt Madel <kmadel@cloudbees.com>
 RUN apt-get update && apt-get install -y --no-install-recommends \
     apt-transport-https
