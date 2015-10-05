@@ -3,7 +3,8 @@
 FROM kmadel/jenkins-base:1.1
 MAINTAINER Kurt Madel <kmadel@cloudbees.com>
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    apt-transport-https
+    apt-transport-https \
+    supervisor
     
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
