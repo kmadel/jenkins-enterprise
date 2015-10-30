@@ -11,7 +11,7 @@ COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 # Download jenkins.war
 USER jenkins
 WORKDIR /usr/lib/jenkins
-RUN curl -L -O -w "Downloaded: %{url_effective}\\n" "http://nectar-downloads.cloudbees.com/cje/1.609/war/1.609.3.1/jenkins.war"
+RUN curl -L -O -w "Downloaded: %{url_effective}\\n" "http://jenkins-updates.cloudbees.com/download/je/1.625.1.1/jenkins.war"
 
 EXPOSE 8080 22
 ENV JENKINS_HOME /var/lib/jenkins
