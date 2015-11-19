@@ -1,17 +1,14 @@
 # Docker image for Jenkins Enterprise by CloudBees master
 
-FROM kmadel/jenkins-base:1.1
+FROM kmadel/jenkins-base:1.5
 MAINTAINER Kurt Madel <kmadel@cloudbees.com>
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    apt-transport-https \
-    supervisor
-    
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+    apt-transport-https
 
 # Download jenkins.war
 USER jenkins
 WORKDIR /usr/lib/jenkins
-RUN curl -L -O -w "Downloaded: %{url_effective}\\n" "http://jenkins-updates.cloudbees.com/download/je/1.609.3.1/jenkins.war"
+RUN curl -L -O -w "Downloaded: %{url_effective}\\n" "http://jenkins-updates.cloudbees.com/download/je/1.609.14.1/jenkins.war"
 
 EXPOSE 8080
 ENV JENKINS_HOME /data/jenkins
