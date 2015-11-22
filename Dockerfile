@@ -1,19 +1,61 @@
-# Docker image for Jenkins Enterprise by CloudBees master
+# Docker image for CloudBees Jenkins Enterprise
 
-FROM kmadel/jenkins-base:1.5
+FROM java:8-jdk
 MAINTAINER Kurt Madel <kmadel@cloudbees.com>
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    apt-transport-https
+RUN apt-get update && apt-get install -y wget git curl zip && rm -rf /var/lib/apt/lists/*
 
-# Download jenkins.war
-USER jenkins
-WORKDIR /usr/lib/jenkins
-RUN curl -L -O -w "Downloaded: %{url_effective}\\n" "http://jenkins-updates.cloudbees.com/download/je/1.609.14.1/jenkins.war"
-
-EXPOSE 8080
-ENV JENKINS_HOME /data/jenkins
+ENV JENKINS_HOME /var/jenkins_home
 ENV SSHD_HOST jenkins.beedemo.local
 ENV JENKINS_PREFIX /cje
+ENV JENKINS_SSH_PORT 2022
+ENV JENKINS_HTTP_PORT 8080
+ENV JENKINS_URL http://jenkins.beedemo.local:8080/cje
 
-#ENTRYPOINT ["java", "-jar", "-Dorg.jenkinsci.main.modules.sshd.SSHD.hostName=${SSHD_HOST}", "jenkins.war", "--httpPort=8080"]
-CMD java -jar -Dorg.jenkinsci.main.modules.sshd.SSHD.hostName=${SSHD_HOST} jenkins.war --prefix=${JENKINS_PREFIX} --httpPort=8080
+# Jenkins is ran with user `jenkins`, uid = 1000
+# If you bind mount a volume from host/volume from a data container, 
+# ensure you use same uid
+RUN useradd -d "$JENKINS_HOME" -u 1000 -m -s /bin/bash jenkins
+
+# Jenkins home directoy is a volume, so configuration and build history 
+# can be persisted and survive image upgrades
+VOLUME $JENKINS_HOME
+
+# `/usr/share/jenkins/ref/` contains all reference configuration we want 
+# to set on a fresh new installation. Use it to bundle additional plugins 
+# or config file with your custom jenkins Docker image.
+RUN mkdir -p /usr/share/jenkins/ref/init.groovy.d
+
+ENV TINI_SHA 066ad710107dc7ee05d3aa6e4974f01dc98f3888
+
+# Use tini as subreaper in Docker container to adopt zombie processes 
+RUN curl -fL https://github.com/krallin/tini/releases/download/v0.5.0/tini-static -o /bin/tini && chmod +x /bin/tini \
+  && echo "$TINI_SHA /bin/tini" | sha1sum -c -
+
+COPY init.groovy /usr/share/jenkins/ref/init.groovy.d/init_00_fixed-ports_url.groovy
+COPY init-disable.groovy /usr/share/jenkins/ref/init.groovy.d/init_99_disable.groovy
+
+ENV JENKINS_VERSION 1.609.14.1
+ENV JENKINS_SHA 39902b1ffa1679017af0cda00b96afa58181a985
+
+# could use ADD but this one does not check Last-Modified header 
+# see https://github.com/docker/docker/issues/8331
+RUN curl -fL http://jenkins-updates.cloudbees.com/download/je/$JENKINS_VERSION/jenkins.war -o /usr/share/jenkins/jenkins.war \
+  && echo "$JENKINS_SHA /usr/share/jenkins/jenkins.war" | sha1sum -c -
+
+RUN chown -R jenkins "$JENKINS_HOME" /usr/share/jenkins/ref
+
+# for main web interface:
+EXPOSE 8080
+
+# will be used for ssh:
+EXPOSE 2022
+
+ENV COPY_REFERENCE_FILE_LOG $JENKINS_HOME/copy_reference_file.log
+
+USER jenkins
+
+COPY jenkins.sh /usr/local/bin/jenkins.sh
+ENTRYPOINT ["/bin/tini", "--", "/usr/local/bin/jenkins.sh"]
+#CMD /bin/bash /usr/local/bin/jenkins.sh $JENKINS_HOME/copy_reference_file.log
+
+#CMD java -jar -Dorg.jenkinsci.main.modules.sshd.SSHD.hostName=${SSHD_HOST} jenkins.war --prefix=${JENKINS_PREFIX} --httpPort=${JENKINS_HTTP_PORT}
