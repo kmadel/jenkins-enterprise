@@ -1,7 +1,7 @@
 # Docker image for CloudBees Jenkins Enterprise
 
 FROM java:8-jdk
-MAINTAINER Kurt Madel <kmadel@cloudbees.com>
+MAINTAINER Harshal Dharia <Hdharia@cloudbees.com>
 RUN apt-get update && apt-get install -y wget git curl zip && rm -rf /var/lib/apt/lists/*
 
 ENV JENKINS_HOME /var/jenkins_home
@@ -36,8 +36,8 @@ RUN curl -fL https://github.com/krallin/tini/releases/download/v0.5.0/tini-stati
 COPY init.groovy /usr/share/jenkins/ref/init.groovy.d/init_00_fixed-ports_url.groovy
 COPY init-disable.groovy /usr/share/jenkins/ref/init.groovy.d/init_99_disable.groovy
 
-ENV JENKINS_VERSION 1.625.3.1
-ENV JENKINS_SHA 3a410c241d7e7d05c6012e2319cefef164636647
+ENV JENKINS_VERSION 1.642.1.1
+ENV JENKINS_SHA d4ba483067011025c578bd88ca805e303d7ce18a
 
 # could use ADD but this one does not check Last-Modified header 
 # see https://github.com/docker/docker/issues/8331
