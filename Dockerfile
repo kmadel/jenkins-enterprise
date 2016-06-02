@@ -37,7 +37,7 @@ COPY init.groovy /usr/share/jenkins/ref/init.groovy.d/init_00_fixed-ports_url.gr
 COPY init-disable.groovy /usr/share/jenkins/ref/init.groovy.d/init_99_disable.groovy
 
 ENV JENKINS_VERSION 1.642.18.1
-ENV JENKINS_SHA a3e903c20fada2d825822e707025d431f95d772e
+ENV JENKINS_SHA 2203f94a9b8fbd8d767ba244726f63ef01175b95
 
 # could use ADD but this one does not check Last-Modified header
 # see https://github.com/docker/docker/issues/8331
