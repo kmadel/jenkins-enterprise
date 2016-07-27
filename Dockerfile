@@ -36,8 +36,8 @@ RUN curl -fL https://github.com/krallin/tini/releases/download/v0.5.0/tini-stati
 COPY init.groovy /usr/share/jenkins/ref/init.groovy.d/init_00_fixed-ports_url.groovy
 COPY init-disable.groovy /usr/share/jenkins/ref/init.groovy.d/init_99_disable.groovy
 
-ENV JENKINS_VERSION 1.642.18.1
-ENV JENKINS_SHA f6118c7785b9d9270dd7086b60e2f86062b70154
+ENV JENKINS_VERSION 1.651.3.1
+ENV JENKINS_SHA 515508cd6311cd343f304c6567bc7f6e03c06a0e
 
 # could use ADD but this one does not check Last-Modified header
 # see https://github.com/docker/docker/issues/8331
